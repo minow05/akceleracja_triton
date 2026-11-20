@@ -1,0 +1,79 @@
+{
+  "triton_baseline": {
+    "ptx_static_counts": {
+      "mma.sync": 64,
+      "wgmma": 0,
+      "ldmatrix": 16,
+      "cp.async": 32,
+      "fma.rn.f32": 0,
+      "bar.sync": 18
+    },
+    "num_warps": 4,
+    "num_stages": 3,
+    "shared": 32768,
+    "n_regs": 214,
+    "n_spills": 0,
+    "sass_static_counts": {
+      "HMMA": 64,
+      "FFMA": 0,
+      "LDGSTS (async copy)": 24,
+      "LDSM (ldmatrix)": 16,
+      "LDS": 22,
+      "LDG": 0,
+      "BAR": 18
+    }
+  },
+  "triton_tuned": {
+    "ptx_static_counts": {
+      "mma.sync": 32,
+      "wgmma": 0,
+      "ldmatrix": 12,
+      "cp.async": 20,
+      "fma.rn.f32": 0,
+      "bar.sync": 10
+    },
+    "num_warps": 8,
+    "num_stages": 3,
+    "shared": 32768,
+    "n_regs": 128,
+    "n_spills": 0,
+    "sass_static_counts": {
+      "HMMA": 32,
+      "FFMA": 0,
+      "LDGSTS (async copy)": 12,
+      "LDSM (ldmatrix)": 12,
+      "LDS": 14,
+      "LDG": 0,
+      "BAR": 10
+    },
+    "config": {
+      "BM": 128,
+      "BN": 128,
+      "BK": 32,
+      "G": 8,
+      "W": 8,
+      "S": 3
+    }
+  },
+  "cuda_tiled": {
+    "nvcc_flags": "-O3 -arch=sm_120",
+    "ptx_static_counts": {
+      "mma.sync": 0,
+      "wgmma": 0,
+      "ldmatrix": 0,
+      "cp.async": 0,
+      "fma.rn.f32": 48,
+      "bar.sync": 6
+    },
+    "ptxas_resource_usage": "ptxas info    : 0 bytes gmem\nptxas info    : Compiling entry function 'gemm_kernel' for 'sm_120'\nptxas info    : Function properties for gemm_kernel\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 38 registers, used 1 barriers, 2048 bytes smem\nptxas info    : Compile time = 0.000 ms\ngemm.cu",
+    "sass_static_counts": {
+      "HMMA": 0,
+      "FFMA": 48,
+      "LDGSTS (async copy)": 0,
+      "LDSM (ldmatrix)": 0,
+      "LDS": 60,
+      "LDG": 6,
+      "BAR": 6
+    }
+  }
+}
