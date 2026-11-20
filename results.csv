@@ -1,0 +1,4 @@
+size,matrix_footprint_mb,cpp_time_ms,cpp_tflops,cpp_peak_mem_mb,cpp_max_err,triton_time_ms,triton_tflops,triton_peak_mem_mb,triton_max_err,pytorch_time_ms,pytorch_tflops,pytorch_peak_mem_mb,speedup_triton_vs_cpp
+512x512x512,1.5,0.171,1.57,2.5,0.0312,0.059,4.55,3.0,0.0,0.039,6.81,34.0,2.89
+2048x2048x2048,24.0,8.965,1.92,40.0,0.125,0.408,42.15,48.0,0.0,0.415,41.42,64.0,21.99
+8192x8192x8192,384.0,603.125,1.82,640.0,0.25,37.689,29.17,768.0,0.0,23.665,46.46,544.0,16.0

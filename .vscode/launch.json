@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File (GPU Execution)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "TRITON_CACHE_DIR": "${workspaceFolder}/.triton"
+      }
+    },
+    {
+      "name": "Triton: Debug Kernel in Interpreter Mode (TRITON_INTERPRET=1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "TRITON_INTERPRET": "1",
+        "TRITON_CACHE_DIR": "${workspaceFolder}/.triton"
+      }
+    },
+    {
+      "name": "Python: Pytest Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v", "${file}"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

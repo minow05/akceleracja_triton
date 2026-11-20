@@ -1,0 +1,23 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportGeneralTypeIssues": "information"
+  },
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "files.associations": {
+    "*.triton": "python",
+    "*.ttir": "mlir",
+    "*.ttgir": "mlir",
+    "*.ptx": "cuda-cpp"
+  },
+  "terminal.integrated.env.windows": {
+    "TRITON_CACHE_DIR": "${workspaceFolder}/.triton"
+  }
+}

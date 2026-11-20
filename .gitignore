@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.dylib
+*.dll
+*.lib
+*.exp
+*.ptx
+*.cubin
+
+# Triton cache
+.triton/
+~/.triton/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Testing & profiling
+.pytest_cache/
+.coverage
+htmlcov/
+*.prof
+*.lprof
+*.nsys-rep
+*.sqlite
+*.qdstrm
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code user-specific overrides
+.vscode/*.log
