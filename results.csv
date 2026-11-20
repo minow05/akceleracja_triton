@@ -1,4 +1,4 @@
-size,matrix_footprint_mb,cpp_time_ms,cpp_tflops,cpp_peak_mem_mb,cpp_max_err,triton_time_ms,triton_tflops,triton_peak_mem_mb,triton_max_err,pytorch_time_ms,pytorch_tflops,pytorch_peak_mem_mb,speedup_triton_vs_cpp
-512x512x512,1.5,0.171,1.57,2.5,0.0312,0.059,4.55,3.0,0.0,0.039,6.81,34.0,2.89
-2048x2048x2048,24.0,8.965,1.92,40.0,0.125,0.408,42.15,48.0,0.0,0.415,41.42,64.0,21.99
-8192x8192x8192,384.0,603.125,1.82,640.0,0.25,37.689,29.17,768.0,0.0,23.665,46.46,544.0,16.0
+size,matrix_footprint_mb,cpp_time_ms,cpp_tflops,cpp_peak_mem_mb,triton_time_ms,triton_tflops,triton_peak_mem_mb,max_diff_cpp_vs_triton,speedup_triton_vs_cpp
+512x512x512,1.5,0.137,1.96,2.0,0.064,4.22,2.5,0.0312,2.15
+2048x2048x2048,24.0,8.459,2.03,32.0,0.487,35.29,40.0,0.125,17.38
+8192x8192x8192,384.0,573.939,1.92,512.0,42.35,25.96,640.0,0.25,13.55

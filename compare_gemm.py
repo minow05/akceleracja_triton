@@ -129,20 +129,16 @@ def run_benchmark():
         iters = 3 if M == 8192 else 10
         warmup = 1 if M == 8192 else 3
 
-        # Reference PyTorch
-        ref_ms, ref_mem, ref_out = measure_kernel(torch.matmul, a, b, iters=iters, warmup=warmup)
-        ref_tflops = (flops / (ref_ms * 1e-3)) * 1e-12
-
         # C++ CUDA
         cpp_ms, cpp_mem, cpp_out = measure_kernel(gemm_cpp, a, b, iters=iters, warmup=warmup)
         cpp_tflops = (flops / (cpp_ms * 1e-3)) * 1e-12
-        cpp_err = torch.max(torch.abs(cpp_out - ref_out)).item()
 
         # Triton
         triton_ms, triton_mem, triton_out = measure_kernel(gemm_triton, a, b, iters=iters, warmup=warmup)
         triton_tflops = (flops / (triton_ms * 1e-3)) * 1e-12
-        triton_err = torch.max(torch.abs(triton_out - ref_out)).item()
 
+        # Numerical comparison between C++ and Triton
+        diff = torch.max(torch.abs(cpp_out - triton_out)).item()
         speedup_vs_cpp = cpp_ms / triton_ms
 
         records.append({
@@ -151,28 +147,23 @@ def run_benchmark():
             "cpp_time_ms": round(cpp_ms, 3),
             "cpp_tflops": round(cpp_tflops, 2),
             "cpp_peak_mem_mb": round(cpp_mem, 2),
-            "cpp_max_err": round(cpp_err, 4),
             "triton_time_ms": round(triton_ms, 3),
             "triton_tflops": round(triton_tflops, 2),
             "triton_peak_mem_mb": round(triton_mem, 2),
-            "triton_max_err": round(triton_err, 4),
-            "pytorch_time_ms": round(ref_ms, 3),
-            "pytorch_tflops": round(ref_tflops, 2),
-            "pytorch_peak_mem_mb": round(ref_mem, 2),
+            "max_diff_cpp_vs_triton": round(diff, 4),
             "speedup_triton_vs_cpp": round(speedup_vs_cpp, 2),
         })
 
-        del a, b, ref_out, cpp_out, triton_out
+        del a, b, cpp_out, triton_out
         torch.cuda.empty_cache()
 
     # Save to CSV
     csv_filename = "results.csv"
     csv_fields = [
         "size", "matrix_footprint_mb",
-        "cpp_time_ms", "cpp_tflops", "cpp_peak_mem_mb", "cpp_max_err",
-        "triton_time_ms", "triton_tflops", "triton_peak_mem_mb", "triton_max_err",
-        "pytorch_time_ms", "pytorch_tflops", "pytorch_peak_mem_mb",
-        "speedup_triton_vs_cpp",
+        "cpp_time_ms", "cpp_tflops", "cpp_peak_mem_mb",
+        "triton_time_ms", "triton_tflops", "triton_peak_mem_mb",
+        "max_diff_cpp_vs_triton", "speedup_triton_vs_cpp",
     ]
 
     with open(csv_filename, mode="w", newline="", encoding="utf-8") as f:
@@ -181,15 +172,14 @@ def run_benchmark():
         writer.writerows(records)
 
     print(f"\nSaved benchmark metrics to {csv_filename}")
-    print("\n" + "=" * 80)
-    print(f"{'Size':<16} | {'C++ (CUDA)':<18} | {'Triton':<18} | {'PyTorch':<18} | {'Speedup'}")
-    print("-" * 80)
+    print("\n" + "=" * 70)
+    print(f"{'Size':<16} | {'C++ (CUDA)':<18} | {'Triton':<18} | {'Speedup'}")
+    print("-" * 70)
     for r in records:
         cpp_str = f"{r['cpp_time_ms']:.2f} ms ({r['cpp_tflops']:.1f} TF)"
         tri_str = f"{r['triton_time_ms']:.2f} ms ({r['triton_tflops']:.1f} TF)"
-        tor_str = f"{r['pytorch_time_ms']:.2f} ms ({r['pytorch_tflops']:.1f} TF)"
-        print(f"{r['size']:<16} | {cpp_str:<18} | {tri_str:<18} | {tor_str:<18} | {r['speedup_triton_vs_cpp']:.1f}x")
-    print("=" * 80)
+        print(f"{r['size']:<16} | {cpp_str:<18} | {tri_str:<18} | {r['speedup_triton_vs_cpp']:.1f}x")
+    print("=" * 70)
 
     print("\n--- CSV OUTPUT CONTENT ---")
     with open(csv_filename, "r", encoding="utf-8") as f:
