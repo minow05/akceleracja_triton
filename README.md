@@ -59,7 +59,7 @@ Optional smoke test first: `.\.venv\Scripts\python.exe report_bench.py --quick -
 | Output | Content |
 |---|---|
 | `env.json`, `env.txt`, `packages.txt` | GPU/CPU/OS, driver, CUDA, PyTorch, Triton versions, `nvidia-smi`, `nvcc --version` |
-| `bench_runs.csv`, `bench_summary.csv` | cuBLAS vs C++ (CUDA) vs Triton baseline vs Triton tuned, sizes 256–8192, 3 runs, median with L2 flush, mean ± std, TFLOPS, % of cuBLAS |
+| `bench_runs.csv`, `bench_summary.csv` | C++ (CUDA) vs Triton baseline vs Triton tuned, sizes 256–8192, 3 runs, median with L2 flush, mean ± std, TFLOPS, speedup vs C++ |
 | `correctness.csv` | Error of every implementation vs an FP32 reference (plus the FP16 rounding lower bound) |
 | `ablation.csv`, `tuned_config.json` | Triton sweep over tile sizes, `num_warps`, `num_stages` |
 | `group_m.csv` | Effect of `GROUP_M` program re-ordering (L2 reuse) on large matrices |

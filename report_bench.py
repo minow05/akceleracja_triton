@@ -1,5 +1,5 @@
 """
-One-shot data collection for the report (C++ CUDA vs Triton vs cuBLAS GEMM).
+One-shot data collection for the report (C++ CUDA vs Triton GEMM).
 
 Usage (from the repo root, ideally in an *Administrator* PowerShell so Nsight Compute works):
     .\\.venv\\Scripts\\python.exe report_bench.py            # full run (~10-20 min)
@@ -9,7 +9,7 @@ Usage (from the repo root, ideally in an *Administrator* PowerShell so Nsight Co
 Everything is written to report_data/:
     env.json / env.txt / packages.txt   hardware + software versions, nvidia-smi, nvcc
     bench_runs.csv                      every measurement (run x size x implementation)
-    bench_summary.csv                   mean/std over runs, TFLOPS, speedups, % of cuBLAS
+    bench_summary.csv                   mean/std over runs, TFLOPS, speedup vs C++ (CUDA)
     correctness.csv                     error of every implementation vs an FP32 reference
     launch_overhead.csv                 eager loop vs CUDA Graph replay for small sizes
     ablation.csv                        Triton tile / num_warps / num_stages sweep
@@ -251,7 +251,6 @@ def arg_to_cfg(arg):
 
 def impls(tuned_cfg):
     d = {
-        "cublas": torch.matmul,
         "cuda_tiled": cg.gemm_cpp,
         "triton_baseline": cg.gemm_triton,
     }
@@ -511,7 +510,6 @@ def section_main(sizes, runs, tuned_cfg):
                 "cv_percent": round(100 * std / mean, 2),
                 "tflops": round(tflops(n, n, n, mean), 2),
                 "speedup_vs_cuda_tiled": round(by_impl["cuda_tiled"][0] / mean, 2),
-                "percent_of_cublas": round(100 * by_impl["cublas"][0] / mean, 1),
                 "footprint_mb": round(3 * n * n * 2 / 2**20, 2),
             })
     write_csv("bench_summary.csv", summary)
