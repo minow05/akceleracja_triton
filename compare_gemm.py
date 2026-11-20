@@ -10,12 +10,17 @@ import triton.language as tl
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Build / load C++ CUDA kernel
-cu_path = os.path.join(os.path.dirname(__file__), "kernels", "gemm.cu")
-dll_path = os.path.join(os.path.dirname(__file__), "kernels", "gemm.dll")
+# Build / load C++ CUDA kernel (compiled natively for the installed GPU, e.g. sm_120)
+_cc_major, _cc_minor = torch.cuda.get_device_capability(0)
+CUDA_ARCH = f"sm_{_cc_major}{_cc_minor}"
+cu_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kernels", "gemm.cu")
+dll_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kernels", f"gemm_{CUDA_ARCH}.dll")
 
-if not os.path.exists(dll_path):
-    subprocess.run(["nvcc", "-O3", "-shared", cu_path, "-o", dll_path], check=True)
+if not os.path.exists(dll_path) or os.path.getmtime(dll_path) < os.path.getmtime(cu_path):
+    subprocess.run(
+        ["nvcc", "-O3", f"-arch={CUDA_ARCH}", "-shared", cu_path, "-o", dll_path],
+        check=True,
+    )
 
 cuda_dll = ctypes.CDLL(dll_path)
 launch_gemm = cuda_dll.launch_gemm
@@ -73,7 +78,10 @@ def gemm_triton(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     c = torch.empty((M, N), device=a.device, dtype=a.dtype)
 
     BLOCK_M, BLOCK_N, BLOCK_K = 128, 128, 32
-    grid = (triton.cdiv(M, BLOCK_M), triton.cdiv(N, BLOCK_N))
+    # The kernel has no boundary masks: dimensions must be multiples of the block sizes.
+    assert M % BLOCK_M == 0 and N % BLOCK_N == 0 and K % BLOCK_K == 0, \
+        "triton_gemm_kernel requires M, N divisible by 128 and K divisible by 32"
+    grid =(triton.cdiv(M, BLOCK_M), triton.cdiv(N, BLOCK_N))
     triton_gemm_kernel[grid](
         a, b, c,
         M, N, K,

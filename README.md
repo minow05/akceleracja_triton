@@ -13,6 +13,8 @@ akceleracja_triton/
 │   └── gemm.cu             # C++ (CUDA) kernel with 2D shared memory tiling
 ├── compare_gemm.py         # C++ vs Triton benchmark runner and CSV exporter
 ├── results.csv             # Exported latency, throughput, memory, and error metrics
+├── report_bench.py         # One-shot data collection for the report -> report_data/
+├── run_report.ps1          # pull -> report_bench.py -> commit + push report_data/
 ├── requirements.txt        # Dependencies
 ├── pyproject.toml
 ├── .gitignore
@@ -37,4 +39,32 @@ akceleracja_triton/
 .\.venv\Scripts\python.exe compare_gemm.py
 ```
 
-The script compiles `kernels/gemm.cu` via `nvcc` on first execution, runs both implementations, and outputs the comparison table and `results.csv`.
+The script compiles `kernels/gemm.cu` via `nvcc` (natively for the installed GPU, e.g. `-arch=sm_120`) on first execution, runs both implementations, and outputs the comparison table and `results.csv`.
+
+---
+
+## 📑 Collecting data for the report (one command)
+
+Open PowerShell **as Administrator** (Nsight Compute needs access to GPU performance counters) in the repo root and run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run_report.ps1
+```
+
+It does `git pull`, runs `report_bench.py` (~10–20 min), then commits and pushes `report_data/`.
+Optional smoke test first: `.\.venv\Scripts\python.exe report_bench.py --quick --no-ncu`.
+
+`report_bench.py` collects:
+
+| Output | Content |
+|---|---|
+| `env.json`, `env.txt`, `packages.txt` | GPU/CPU/OS, driver, CUDA, PyTorch, Triton versions, `nvidia-smi`, `nvcc --version` |
+| `bench_runs.csv`, `bench_summary.csv` | cuBLAS vs C++ (CUDA) vs Triton baseline vs Triton tuned, sizes 256–8192, 3 runs, median with L2 flush, mean ± std, TFLOPS, % of cuBLAS |
+| `correctness.csv` | Error of every implementation vs an FP32 reference (plus the FP16 rounding lower bound) |
+| `ablation.csv`, `tuned_config.json` | Triton sweep over tile sizes, `num_warps`, `num_stages` |
+| `group_m.csv` | Effect of `GROUP_M` program re-ordering (L2 reuse) on large matrices |
+| `launch_overhead.csv` | Eager loop vs CUDA Graph replay for small sizes |
+| `gpu_state.csv` | Temperature, clocks and power after each run |
+| `isa/` | PTX / SASS of every kernel + instruction counts (`HMMA` = Tensor Cores, `FFMA` = CUDA cores), registers, shared memory |
+| `ncu_2048.ncu-rep`, `ncu_2048_details.csv` | Nsight Compute profile of each kernel at 2048³ |
+| `log.txt` | Full console output |
